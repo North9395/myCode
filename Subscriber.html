@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<script type="text/javascript" src="E:/nms/client/js/d3.v3.min.js"></script>
+    <title>Subscriber/Publiser</title>
+</head>
+<body>
+
+	<label>价格浮动</label>
+	<input type="number" id="flux">
+	<button id="increaseBtn">上升</button>
+	<button id="decreaseBtn">下降</button>
+	<br />
+	<span id="priceSpan"></span>
+
+</body>
+<script>
+	// 发布功能实现实例
+	var publisher = {
+		subscribers: {
+			any: []
+		},
+		subscribe: function(fn, type) {
+			type = type || 'any';
+			if (typeof this.subscribers[type] === 'undefined') {
+				this.subscribers[type] = [];
+			}
+			this.subscribers[type].push(fn);
+		},
+		unsubscribe: function(fn, type) {
+			this.visitSubscribers('unsubscribe', fn, type);
+		},
+		publish: function(publication, type) {
+			this.visitSubscribers('publish', publication, type);
+		},
+		visitSubscribers: function(action, arg, type) {
+			var pubtype = type || 'any',
+				subscribers = this.subscribers[pubtype],
+				i,
+				max = subscribers.length;
+			for (i = 0; i < max; i++) {
+				if (action === 'publish') {
+					subscribers[i](arg);
+				} else {
+					if (subscribers[i] === arg) {
+						subscribers.splice(i, 1);
+					}
+				}
+			}
+		}
+	}
+	// 将发布方法复制到传入的对象中
+	function makePublisher(o) {
+		for(var i in publisher) {
+			if (publisher.hasOwnProperty(i) && typeof publisher[i] === 'function') {
+				o[i] = publisher[i];
+			}
+		}
+		o.subscribers = {
+			any: []
+		}
+	}
+
+	// 测试
+	var publish = {
+		priceIncrease: function(flux) {
+		this.publish('Price Increase :' + flux);
+		},
+		priceDecrease: function(flux) {
+			this.publish('Price Decrease :' + flux);
+		},
+	}
+	makePublisher(publish);
+
+	// var price = 100;
+	var board = {
+		_price: 100,
+		changePrice: function(content) {
+			var flux = Number(content.split(":")[1]);
+			this.setPrice(flux);
+			span.innerHTML = this.getPrice();
+		},
+		setPrice: function(flux) {
+			this._price = this._price + flux;
+		},
+		getPrice: function() {
+			return this._price;
+		},
+	}
+	publish.subscribe(board.changePrice.bind(board));
+	document.getElementById("priceSpan").innerHTML= board.getPrice()
+	var increaseBtn = document.getElementById('increaseBtn');
+	var decreaseBtn = document.getElementById('decreaseBtn');
+	var flux = document.getElementById('flux');
+	var span = document.getElementById('priceSpan');
+	increaseBtn.onclick = function() {
+		publish.priceIncrease(Number(flux.value));
+	}
+	decreaseBtn.onclick = function() {
+		publish.priceDecrease(-Number(flux.value));
+	}
+
+</script>
+</html>
