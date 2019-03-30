@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script type="text/javascript" src="E:/nms/client/js/d3.v3.min.js"></script> -->
+    <script src="D:/code/d3/d3.js"></script>
+	<title>Subscriber/Publiser</title>
+	<style>
+		div.v-bar {
+			width: 30px;
+			background: green;
+			margin: 10px;
+            display: inline-block;
+		}
+        div.cell {
+            width: 60px;
+            height: 40px;
+            background: green;
+            border: 1px solid black;
+            display: inline-block;
+        }
+	</style>
+</head>
+<body>
+    <div id="line1"></div>
+    <div id="line2"></div>
+    <dib class="cell"></dib>
+</body>
+<script>
+    const linear = d3.scaleLinear()
+        .domain([1,10])
+        .range([1,10])
+
+
+    const color = d3.interpolateRgb('white', 'blue');
+    console.log(color(0))
+    console.log(color(0.4))
+    console.log(color(1))
+    const test = d3.scaleLinear()
+        .domain([0,27])
+        .range(["a", "z"]);
+
+    const stringInterpolator = d3.interpolateString("a1", "z10");
+    console.log(stringInterpolator(0))
+    console.log(stringInterpolator(0.4))
+    console.log(stringInterpolator(1))
+
+    // d3.interpolators.push(intopolate);
+
+    const data = [];
+    for(let i = 0; i < 10; i++) {
+        data.push(i+1)
+    }
+
+    function print(selector, scale) {
+        d3.select(selector).selectAll('div.cell')
+            .data(data)
+            .enter()
+            .append('div')
+            .classed('cell', true)
+            .append('span')
+
+        d3.select(selector).selectAll('div.cell')
+            .data(data)
+            .exit()
+            .remove()
+
+        d3.select(selector).selectAll('div.cell')
+            .data(data)
+            .select('span')
+                .text(function(d) {
+                    return scale(d);
+                })
+    }
+    print('#line1', linear);
+</script>
+</html>

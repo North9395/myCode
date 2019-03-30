@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<script src="D:/code/d3/d3.js"></script>
+	<title>Subscriber/Publiser</title>
+	<style>
+		div.h-bar {
+			height: 30px;
+			background: green;
+			margin: 10px;
+		}
+		.grid-line {
+			fill: none;
+			stroke: #000;
+			shape-rendering: crispEdges;
+		}
+	</style>
+</head>
+<body>
+	<button onclick="renderAll('top')">top</button>
+	<button onclick="renderAll('left')">left</button>
+	<button onclick="renderAll('right')">right</button>
+	<button onclick="renderAll('bottom')">bottom</button>
+	<div id="container"></div>
+	<div id="container2"></div>
+</body>
+<script>
+	const width = 1000,
+		height = 1000,
+		offset = 50,
+		margin = 25;
+
+	const axisWidth = width - 2 * margin;
+	
+	const linear = d3.scaleLinear()
+		.domain([0,100])
+		.range([0, axisWidth]);
+
+	const pow = d3.scalePow()
+		.exponent(2)
+		.domain([1, 100])
+		.range([0, axisWidth])
+
+	const date = d3.scaleTime()
+		.domain([new Date(2019,2,1,1,10,0), new Date(2019,2,1, 1,15,0)])
+		.range([0, axisWidth]);
+
+	let svg = d3.select('#container')
+		.append('svg')
+		.attr('width', width)
+		.attr('height', height)
+		.classed('svg', true);
+
+
+	var svg2 = d3.select('#container')
+		.append('svg')
+		.classed('testSvg', true)
+		.attr('width', width)
+		.attr('height', height)
+
+	var sacleY = d3.scaleLinear()
+		.domain([1,10, 11, 12])
+		.range([1,100,130,160])
+	
+	var axisY = d3.axisRight(sacleY)
+		.ticks(10)
+
+	svg2.append('g')
+		.attr('class', 'y-axis')
+		.attr('transform', function() {
+			return 'translate(50, 50)'
+		})
+		.call(axisY)
+		.selectAll("text")
+		.text(function(d){
+			if(d >= 12)
+				return '超时';
+			if(d > 10)
+				return '时延较大'
+			else
+				return d;  
+		});    
+		
+		
+	d3.selectAll('g.y-axis g.tick')
+		.append('line')
+		.classed('grid-line', true)
+		.attr('x1', 0)
+		.attr('y1', 0)
+		.attr('x2', width - 2 *  margin)
+		.attr('y2', 0);
+
+	function renderAll(orient) {
+		if (svg)
+			svg.remove();
+		svg = d3.select('#container')
+			.append('svg')
+			.attr('width', width)
+			.attr('height', height)
+			.classed('svg', true);
+		for (let i = 1; i <= 3; i++) {
+			const type = [linear, pow, date];
+			const scale = type[i-1];
+			let axis = d3.axisTop(scale);
+			switch(orient) {
+				case 'left':
+					axis = d3.axisLeft(scale);
+					break;
+				case 'right':
+					axis = d3.axisRight(scale);
+					break;
+				case 'bottom':
+					axis = d3.axisBottom(scale);
+					break;
+				default:
+					axis = d3.axisTop(scale);
+			}
+			axis.ticks(d3.timeMinute.every(1))
+
+			svg.append('g')
+				.attr('transform', function() {
+					if (['bottom', 'top'].indexOf(orient) > -1)
+						return `translate(${margin}, ${i * offset})`;
+					else 
+						return `translate(${i * offset}, ${margin})`;
+				})
+				.call(axis);
+			}
+		
+	}
+
+</script>
+</html>

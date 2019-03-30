@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <script type="text/javascript" src="E:/nms/client/js/d3.v3.min.js"></script> -->
+    <script src="D:/code/d3/d3.js"></script>
+	<title>调整坐标轴尺度</title>
+	<style>
+		div.v-bar {
+			width: 30px;
+			background: green;
+			margin: 10px;
+            display: inline-block;
+		}
+        div.cell {
+            width: 60px;
+            height: 40px;
+            background: green;
+            border: 1px solid black;
+            display: inline-block;
+        }
+        .grid-line {
+            stroke: gray;
+            fill: aqua;
+        }
+	</style>
+</head>
+<body>
+    <div id="contatiner"></div>
+    <button id="btn">重置</button>
+</body>
+<script>
+    document.getElementById("btn").onclick = rescale;
+    const width = 800,
+        height = 800,
+        margin = 50;
+
+    const xScale = d3.scaleLinear()
+        .domain([0,20])
+        .range([0, width - 2 * margin]);
+
+    const yScale = d3.scaleLinear()
+        .domain([10,50])
+        .range([0, height - 2 * margin]);
+
+    const xAsix = d3.axisBottom(xScale)
+        .ticks(10)
+
+    const yAsix = d3.axisLeft(yScale)
+        .ticks(10)
+
+    const svg = d3.select("#contatiner")
+        .append("svg")
+        .attr("class", "axis")
+        .attr("width", width)
+        .attr("height", height)
+
+    svg.append("g")
+        .classed("x-axis", true)
+        .attr("transform", `translate(${margin}, ${height - margin})`)
+        .call(xAsix);
+
+    svg.append("g")
+        .classed("y-axis", true)
+        .attr("transform", `translate(${margin}, ${margin})`)
+        .call(yAsix);
+
+    function rescale() {
+        const max = Math.round(Math.random() * 100);
+        
+        const newXscale = d3.scaleLinear()
+            .domain([0, max])
+            .range([0, width - 2 * margin]);
+
+        xAsix.scale(newXscale);
+
+        svg.select('g.x-axis')
+            .transition()
+            .call(xAsix);
+
+        renderGridLines();
+    }
+    rescale();
+
+    function renderGridLines() {
+        d3.selectAll("g g.tick")
+            .select("line.grid-line")
+            .remove();
+
+        const xlines = d3.selectAll("g.x-axis g.tick")
+            .append("line")
+            .classed("grid-line", true)
+            .attr("x1", 0)
+            .attr("y1", 0)
+            .attr("x2", 0)
+            .attr("y2", -height + 2 * margin);
+
+        const ylines = d3.selectAll("g.y-axis g.tick")
+            .append("line")
+            .classed("grid-line", true)
+            .attr("x1", 0)
+            .attr("y1", 0)
+            .attr("x2", width - 2 * margin)
+            .attr("y2", 0)
+    }
+</script>
+</html>
